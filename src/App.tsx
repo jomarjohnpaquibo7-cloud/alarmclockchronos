@@ -300,7 +300,7 @@ function App() {
       <header className="topbar">
         <div className="brand">
           <div className="brand-icon brand-logo-wrap">
-            <img src="/resources/gising-na-logo.jpg" alt="Gising Na! Alarm Solutions" className="brand-logo" />
+            <img src="./resources/gising-na-logo.jpg" alt="Gising Na! Alarm Solutions" className="brand-logo" />
           </div>
           <div>
             <div className="brand-title">
