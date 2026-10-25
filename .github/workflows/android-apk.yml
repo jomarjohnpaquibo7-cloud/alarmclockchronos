@@ -9,6 +9,8 @@ on:
       - 'package-lock.json'
       - 'capacitor.config.ts'
       - 'src/**'
+      - 'public/**'
+      - 'assets/**'
       - 'firestore.rules'
       - '.github/workflows/android-apk.yml'
 permissions:
@@ -42,6 +44,15 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
       - name: Generate Android project
         run: npx cap add android
+      - name: Prepare launcher icon from Gising Na logo
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes imagemagick
+          mkdir -p assets
+          convert public/resources/gising-na-logo.jpg -auto-orient -resize '1024x1024^' -gravity center -extent 1024x1024 assets/icon.png
+          cp assets/icon.png assets/icon-foreground.png
+          convert -size 1024x1024 xc:'#070a12' assets/icon-background.png
+          npx --yes @capacitor/assets generate --android --assetPath assets
       - name: Sync Capacitor plugins
         run: npx cap sync android
       - name: Set up Java
