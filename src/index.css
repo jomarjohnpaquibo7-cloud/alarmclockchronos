@@ -1049,3 +1049,18 @@ footer span {
 @media (max-width:620px) { .header-actions { align-items:stretch; } .theme-toggle { align-self:flex-start; } }
 
 html[data-theme='light'] body { background: radial-gradient(circle at 12% 15%, rgba(0, 190, 210, .07), transparent 36%), radial-gradient(circle at 88% 75%, rgba(127, 0, 255, .05), transparent 38%), #f6f9fd; }
+
+/* Keep the Gising Na logo neatly contained inside its square app-brand box. */
+.brand-logo-wrap {
+  overflow: hidden;
+  padding: 3px;
+  flex: 0 0 48px;
+  border-radius: 12px;
+}
+.brand-logo-wrap .brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
