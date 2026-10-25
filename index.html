@@ -6,9 +6,32 @@
     <meta name="theme-color" content="#070a12" />
     <meta name="description" content="Gising Na! Alarm Solutions — offline-ready alarm and schedule manager" />
     <title>Gising Na! Alarm Solutions</title>
+    <style>
+      html,body { margin:0; min-height:100%; background:#070a12; color:#eef4ff; font-family:Arial,sans-serif; }
+      #boot-status { min-height:100vh; display:grid; place-content:center; text-align:center; padding:24px; box-sizing:border-box; }
+      #boot-status p { color:#9aabc2; max-width:340px; line-height:1.5; }
+    </style>
+    <script>
+      (function () {
+        function showStartupError(message) {
+          var root = document.getElementById('root');
+          if (!root) return;
+          root.innerHTML = '<div id="boot-status"><h2>Hindi makapagsimula ang Gising Na!</h2><p>May error sa pagbukas ng app. Kunan ng screenshot ang mensaheng ito at ipadala para maayos natin.</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere;color:#ffb4b4;text-align:left"></pre></div>';
+          var detail = root.querySelector('pre');
+          if (detail) detail.textContent = String(message || 'Unknown startup error');
+        }
+        window.addEventListener('error', function (event) {
+          showStartupError(event.message || (event.target && event.target.src) || 'Failed to load an app file');
+        });
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event.reason;
+          showStartupError(reason && (reason.stack || reason.message) || reason || 'Unhandled startup promise error');
+        });
+      })();
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="boot-status"><h2>Binubuksan ang Gising Na!</h2><p>Sandali lang habang naglo-load ang alarm app…</p></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
