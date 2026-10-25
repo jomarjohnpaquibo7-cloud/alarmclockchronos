@@ -278,6 +278,7 @@ function App() {
       <main className="layout">
         <section className="left-column">
           <div className="panel clock-panel">
+            <div className="clock-brand">ChatGPT</div>
             <div className="section-label">
               <Clock3 size={15} /> LIVE TIME{' '}
               <span className="timezone">
