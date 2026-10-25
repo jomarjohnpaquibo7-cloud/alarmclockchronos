@@ -48,7 +48,7 @@ jobs:
         run: |
           manifest="android/app/src/main/AndroidManifest.xml"
           if ! grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"; then
-            sed -i '/<manifest/a\\    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />' "$manifest"
+            sed -i '/<manifest/a\    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />' "$manifest"
           fi
           grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"
       - name: Prepare launcher icon from Gising Na logo
