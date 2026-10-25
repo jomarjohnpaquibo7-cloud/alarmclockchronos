@@ -974,3 +974,5 @@ footer span {
 .light-theme .alarm-modal { background:#fff8fb; }
 @media (max-width:960px) { .header-actions { width:100%; justify-content:space-between; } }
 @media (max-width:620px) { .header-actions { align-items:stretch; } .theme-toggle { align-self:flex-start; } }
+
+html[data-theme='light'] body { background: radial-gradient(circle at 12% 15%, rgba(0, 190, 210, .07), transparent 36%), radial-gradient(circle at 88% 75%, rgba(127, 0, 255, .05), transparent 38%), #f6f9fd; }
