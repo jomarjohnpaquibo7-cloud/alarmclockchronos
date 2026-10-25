@@ -31,13 +31,25 @@ type Note = { id: string; title: string; body: string; date: string };
 type State = { schedules: Schedule[]; notes: Note[] };
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const EMPTY: State = { schedules: [], notes: [] };
+const makeId = () => {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch { /* Use the compatibility fallback below. */ }
+  return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+};
 const getClientKey = () => {
-  let key = localStorage.getItem('chronos_client_key');
-  if (!key) {
-    key = crypto.randomUUID().replaceAll('-', '');
-    localStorage.setItem('chronos_client_key', key);
+  try {
+    let key = localStorage.getItem('chronos_client_key');
+    if (!key) {
+      key = makeId().replaceAll('-', '');
+      localStorage.setItem('chronos_client_key', key);
+    }
+    return key;
+  } catch {
+    return makeId().replaceAll('-', '');
   }
-  return key;
 };
 const clientKey = getClientKey();
 const time12 = (value: string) => {
@@ -188,7 +200,7 @@ function App() {
       return;
     }
     const item: Schedule = {
-      id: editId || crypto.randomUUID(),
+      id: editId || makeId(),
       title: title.trim(),
       time,
       sound,
@@ -226,7 +238,7 @@ function App() {
       return;
     }
     const note: Note = {
-      id: crypto.randomUUID(),
+      id: makeId(),
       title: noteTitle.trim(),
       body: noteBody.trim(),
       date: new Date().toLocaleString(),
