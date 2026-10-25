@@ -5,13 +5,32 @@ const DAY_NUMBER: Record<string, number> = { Sun: 1, Mon: 2, Tue: 3, Wed: 4, Thu
 function notificationId(id: string, day: string) { let hash = 0; for (const char of id + ':' + day) hash = (Math.imul(hash, 31) + char.charCodeAt(0)) | 0; return (Math.abs(hash) % 2000000000) + 1; }
 export async function prepareAlarmNotifications() {
   if (!Capacitor.isNativePlatform()) return;
-  const permission = await LocalNotifications.checkPermissions();
-  if (permission.display !== 'granted') await LocalNotifications.requestPermissions();
+
+  let permission = await LocalNotifications.checkPermissions();
+  if (permission.display !== 'granted') {
+    permission = await LocalNotifications.requestPermissions();
+  }
+  if (permission.display !== 'granted') {
+    throw new Error('Notification permission is off. Allow notifications for Gising Na! in Android settings.');
+  }
+
+  const exact = await LocalNotifications.checkExactNotificationSetting();
+  if (exact.exact_alarm !== 'granted') {
+    throw new Error('Exact alarm access is off. Tap “Enable exact alarms” and allow Alarms & reminders in Android settings.');
+  }
+
   await LocalNotifications.createChannel({ id: 'chronos-alarms', name: 'Chronos Alarms', description: 'Scheduled alarm reminders', importance: 5, visibility: 1, sound: 'default', vibration: true });
 }
+
+export async function openExactAlarmSettings() {
+  if (!Capacitor.isNativePlatform()) return;
+  await LocalNotifications.changeExactNotificationSetting();
+}
+
 export async function syncAlarmNotifications(alarms: Alarm[]) {
   if (!Capacitor.isNativePlatform()) return;
-  await prepareAlarmNotifications();
+  const hasEnabledAlarm = alarms.some(alarm => alarm.enabled && alarm.days.some(day => DAY_NUMBER[day]));
+  if (hasEnabledAlarm) await prepareAlarmNotifications();
   const pending = await LocalNotifications.getPending();
   const wanted = new Map<number, LocalNotificationSchema>();
   for (const alarm of alarms) {

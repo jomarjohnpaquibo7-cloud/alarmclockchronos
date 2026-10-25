@@ -44,6 +44,13 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
       - name: Generate Android project
         run: npx cap add android
+      - name: Enable exact Android alarms
+        run: |
+          manifest="android/app/src/main/AndroidManifest.xml"
+          if ! grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"; then
+            sed -i '/<manifest/a\\    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />' "$manifest"
+          fi
+          grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"
       - name: Prepare launcher icon from Gising Na logo
         run: |
           sudo apt-get update

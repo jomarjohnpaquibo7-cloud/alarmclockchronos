@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { loadState, saveState, isFirebaseConfigured } from './data';
-import { prepareAlarmNotifications, syncAlarmNotifications } from './alarms';
+import { openExactAlarmSettings, syncAlarmNotifications } from './alarms';
 import {
   Bell,
   BellRing,
@@ -59,6 +59,7 @@ function App() {
   const [saving, setSaving] = useState(false);
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [errorMsg, setErrorMsg] = useState('');
+  const [needsExactAlarmPermission, setNeedsExactAlarmPermission] = useState(false);
   const [title, setTitle] = useState('');
   const [time, setTime] = useState('07:00');
   const [sound, setSound] = useState('chime');
@@ -88,12 +89,15 @@ function App() {
     const updateOnline = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', updateOnline);
     window.addEventListener('offline', updateOnline);
-    prepareAlarmNotifications().catch(() => setErrorMsg('Please allow notifications so alarms can ring on this device.'));
     loadState(clientKey)
       .then(async data => {
         const next = { schedules: data.schedules || [], notes: data.notes || [] };
         setState(next);
-        await syncAlarmNotifications(next.schedules).catch(() => setErrorMsg('Could not schedule native alarms. Check notification permissions in Android settings.'));
+        await syncAlarmNotifications(next.schedules).catch(error => {
+          const message = error instanceof Error ? error.message : 'Could not schedule native alarms. Check Android notification settings.';
+          setErrorMsg(message);
+          setNeedsExactAlarmPermission(/exact alarm access/i.test(message));
+        });
       })
       .catch(() => setErrorMsg('Could not load saved data. Check Firebase setup and internet access.'))
       .finally(() => setLoading(false));
@@ -103,6 +107,24 @@ function App() {
       window.removeEventListener('offline', updateOnline);
     };
   }, []);
+
+  useEffect(() => {
+    if (loading || !state.schedules.some(alarm => alarm.enabled && alarm.days.length > 0)) return;
+    const retryAlarmSyncOnReturn = () => {
+      void syncAlarmNotifications(state.schedules)
+        .then(() => {
+          setNeedsExactAlarmPermission(false);
+          setErrorMsg('');
+        })
+        .catch(error => {
+          const message = error instanceof Error ? error.message : 'Could not schedule native alarms. Check Android notification settings.';
+          setErrorMsg(message);
+          setNeedsExactAlarmPermission(/exact alarm access/i.test(message));
+        });
+    };
+    window.addEventListener('focus', retryAlarmSyncOnReturn);
+    return () => window.removeEventListener('focus', retryAlarmSyncOnReturn);
+  }, [loading, state.schedules]);
 
   useEffect(() => {
     if (loading) return;
@@ -132,13 +154,16 @@ function App() {
   async function persist(next: State) {
     setSaving(true);
     setErrorMsg('');
+    setNeedsExactAlarmPermission(false);
     try {
       await saveState(clientKey, next);
       setState(next);
       try {
         await syncAlarmNotifications(next.schedules);
-      } catch {
-        setErrorMsg('Your changes were saved, but Android notifications could not be updated. Check notification permission.');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Your changes were saved, but Android notifications could not be updated. Check Android notification settings.';
+        setErrorMsg(message);
+        setNeedsExactAlarmPermission(/exact alarm access/i.test(message));
       }
     } catch {
       setErrorMsg(
@@ -485,6 +510,13 @@ function App() {
           {errorMsg && (
             <div className="error-banner" role="alert">
               {errorMsg}
+              {needsExactAlarmPermission && (
+                <button className="text-button" type="button" onClick={() => {
+                  void openExactAlarmSettings().catch(() => setErrorMsg('Could not open Android exact-alarm settings. Open Settings → Apps → Gising Na! → Alarms & reminders.'));
+                }}>
+                  Enable exact alarms
+                </button>
+              )}
               <button onClick={() => setErrorMsg('')}>
                 <X size={14} />
               </button>
