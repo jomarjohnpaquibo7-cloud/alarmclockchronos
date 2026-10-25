@@ -52,6 +52,9 @@ function App() {
   const [clock, setClock] = useState(new Date());
   const [tab, setTab] = useState<'alarms' | 'notes'>('alarms');
   const [search, setSearch] = useState('');
+  const [appName, setAppName] = useState(() => { try { return localStorage.getItem('chronos_app_name') || 'Nova'; } catch { return 'Nova'; } });
+  const [nameDraft, setNameDraft] = useState('');
+  const [editingAppName, setEditingAppName] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
@@ -70,6 +73,10 @@ function App() {
     try { return localStorage.getItem('chronos_theme') === 'light' ? 'light' : 'dark'; }
     catch { return 'dark'; }
   });
+
+  useEffect(() => {
+    try { localStorage.setItem('chronos_app_name', appName); } catch { /* Name remains available for this session. */ }
+  }, [appName]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -220,22 +227,32 @@ function App() {
   function playTone() {
     try {
       const ctx = new AudioContext();
+      const now = ctx.currentTime;
       const osc = ctx.createOscillator();
-      const gain = ctx.createGain();      osc.type = sound === 'digital' ? 'square' : 'sine';
-      osc.frequency.value =
-        sound === 'bell'
-          ? 587
-          : sound === 'pulse'
-            ? 880
-            : sound === 'zen'
-              ? 432
-              : 660;
-      gain.gain.value = 0.12;
+      const gain = ctx.createGain();
+      const loud = ['power-horn', 'rapid-pulse', 'triple-klaxon'].includes(sound);
+      osc.type = ['digital', 'rapid-pulse'].includes(sound) ? 'square' : sound === 'triple-klaxon' ? 'sawtooth' : sound === 'power-horn' ? 'triangle' : 'sine';
+      const base = sound === 'bell' ? 587 : sound === 'pulse' ? 880 : sound === 'zen' ? 432 : sound === 'power-horn' ? 360 : sound === 'rapid-pulse' ? 1180 : sound === 'triple-klaxon' ? 760 : 660;
+      osc.frequency.setValueAtTime(base, now);
+      if (sound === 'power-horn') {
+        osc.frequency.linearRampToValueAtTime(470, now + 0.16);
+        osc.frequency.linearRampToValueAtTime(340, now + 0.32);
+      } else if (sound === 'rapid-pulse') {
+        osc.frequency.linearRampToValueAtTime(820, now + 0.10);
+        osc.frequency.linearRampToValueAtTime(1250, now + 0.20);
+      } else if (sound === 'triple-klaxon') {
+        osc.frequency.linearRampToValueAtTime(1120, now + 0.10);
+        osc.frequency.linearRampToValueAtTime(620, now + 0.20);
+        osc.frequency.linearRampToValueAtTime(1120, now + 0.30);
+      }
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(loud ? 0.24 : 0.14, now + 0.025);
+      gain.gain.setTargetAtTime(0.001, now + 0.32, 0.08);
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.5);
-      osc.onended = () => void ctx.close();
+      osc.start(now);
+      osc.stop(now + 0.62);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); void ctx.close(); };
     } catch {
       setErrorMsg('Sound preview is unavailable in this browser.');
     }
@@ -278,7 +295,19 @@ function App() {
       <main className="layout">
         <section className="left-column">
           <div className="panel clock-panel">
-            <div className="clock-brand">ChatGPT</div>
+            <div className="clock-brand">
+              {editingAppName ? (
+                <form className="app-name-editor" onSubmit={e => { e.preventDefault(); const next = nameDraft.trim().slice(0, 24); if (next) setAppName(next); setEditingAppName(false); }}>
+                  <input aria-label="App name" autoFocus value={nameDraft} onChange={e => setNameDraft(e.target.value)} maxLength={24} placeholder="Enter app name" />
+                  <button type="submit" aria-label="Save app name"><Check size={16} /></button>
+                  <button type="button" aria-label="Cancel app name edit" onClick={() => setEditingAppName(false)}><X size={16} /></button>
+                </form>
+              ) : (
+                <button type="button" className="app-name-button" onClick={() => { setNameDraft(appName); setEditingAppName(true); }} title="Click to change app name" aria-label={`App name: ${appName}. Click to edit`}>
+                  {appName} <Edit3 size={15} />
+                </button>
+              )}
+            </div>
             <div className="section-label">
               <Clock3 size={15} /> LIVE TIME{' '}
               <span className="timezone">
@@ -372,6 +401,9 @@ function App() {
                       <option value="bell">Classic Bell</option>
                       <option value="pulse">Cyber Pulse</option>
                       <option value="zen">Gentle Zen Tone</option>
+                      <option value="power-horn">Power Horn (Deep & Loud)</option>
+                      <option value="rapid-pulse">Rapid Pulse (Fast & Loud)</option>
+                      <option value="triple-klaxon">Triple Klaxon (Urgent)</option>
                     </select>
                     <button
                       type="button"
