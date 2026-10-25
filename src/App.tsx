@@ -479,7 +479,7 @@ function App() {
           </div>
           {!isFirebaseConfigured && (
             <div className="error-banner" role="status">
-              Firebase is not configured yet. Alarms can be saved on this device, but cloud sync needs the Firebase setup in FIREBASE_SETUP.md.
+              Device-only mode is active. Your alarms and notes continue to save on this device, and alarm notifications work without Firebase. To enable cloud sync across devices, add your own Firebase web-app settings using FIREBASE_SETUP.md.
             </div>
           )}
           {errorMsg && (
@@ -650,7 +650,7 @@ function App() {
         <span>
           <Moon size={13} /> Built for focus. Designed for time.
         </span>
-        <span>{saving ? 'Saving…' : isOnline ? 'Online · cloud sync ready' : 'Offline · saved on device'}</span>
+        <span>{saving ? 'Saving…' : !isFirebaseConfigured ? 'Device-only · saved on this device' : isOnline ? 'Online · sync available' : 'Offline · saved on device'}</span>
       </footer>
       {ringing && (
         <div className="modal-backdrop">
