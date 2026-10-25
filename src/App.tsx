@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { api } from '@appdeploy/client';
+import { loadState, saveState, isFirebaseConfigured } from './data';
+import { prepareAlarmNotifications, syncAlarmNotifications } from './alarms';
 import {
   Bell,
   BellRing,
@@ -66,14 +67,14 @@ function App() {
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(new Date()), 1000);
-    api
-      .get(`/api/state?clientKey=${encodeURIComponent(clientKey)}`)
-      .then(({ data }) =>
-        setState({ schedules: data.schedules || [], notes: data.notes || [] })
-      )
-      .catch(() => {
-        setErrorMsg('Could not load cloud data. Please refresh to try again.');
+    prepareAlarmNotifications().catch(() => setErrorMsg('Please allow notifications so alarms can ring on this device.'));
+    loadState(clientKey)
+      .then(async data => {
+        const next = { schedules: data.schedules || [], notes: data.notes || [] };
+        setState(next);
+        await syncAlarmNotifications(next.schedules).catch(() => setErrorMsg('Could not schedule native alarms. Check notification permissions in Android settings.'));
       })
+      .catch(() => setErrorMsg('Could not load saved data. Check Firebase setup and internet access.'))
       .finally(() => setLoading(false));
     return () => window.clearInterval(timer);
   }, []);
@@ -107,8 +108,13 @@ function App() {
     setSaving(true);
     setErrorMsg('');
     try {
-      await api.put('/api/state', { clientKey, state: next });
+      await saveState(clientKey, next);
       setState(next);
+      try {
+        await syncAlarmNotifications(next.schedules);
+      } catch {
+        setErrorMsg('Your changes were saved, but Android notifications could not be updated. Check notification permission.');
+      }
     } catch {
       setErrorMsg(
         'Save failed. Your latest changes were not confirmed in the database.'
@@ -411,6 +417,11 @@ function App() {
               <FileText size={16} /> Quick Notepad
             </button>
           </div>
+          {!isFirebaseConfigured && (
+            <div className="error-banner" role="status">
+              Firebase is not configured yet. Alarms can be saved on this device, but cloud sync needs the Firebase setup in FIREBASE_SETUP.md.
+            </div>
+          )}
           {errorMsg && (
             <div className="error-banner" role="alert">
               {errorMsg}
