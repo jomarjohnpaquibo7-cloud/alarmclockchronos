@@ -15,7 +15,11 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@capacitor/core": "^7.4.3",
-    "@capacitor/android": "^7.4.3"
+    "@capacitor/android": "^7.4.3",
+    "firebase": "^11.10.0",
+    "@capacitor/local-notifications": "^7.0.2",
+    "@capacitor/app": "^7.0.2",
+    "@capacitor/browser": "^7.0.2"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.0.0"
