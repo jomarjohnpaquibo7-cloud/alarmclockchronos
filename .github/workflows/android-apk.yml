@@ -23,6 +23,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Fetch bundled Gising Na logo
+        run: |
+          mkdir -p public/resources
+          curl --fail --location --retry 3 'https://chronos-alarm-schedule-manager-ampjst.v2.appdeploy.ai/resources/gising-na-logo.jpg' --output public/resources/gising-na-logo.jpg
       - name: Install dependencies
         run: npm install
       - name: Build web assets
