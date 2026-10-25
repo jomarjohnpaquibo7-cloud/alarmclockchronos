@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.chronos.alarmclock',
-  appName: 'Chronos Alarm',
+  appName: 'Gising Na! Alarm Solutions',
   webDir: 'dist',
   android: { allowMixedContent: false },
 };
