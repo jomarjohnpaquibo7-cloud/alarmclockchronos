@@ -1,4 +1,5 @@
 name: Build Chronos Android APK
+# Firebase repository variables are injected at build time; rerun this workflow after changing them.
 on:
   workflow_dispatch:
   push:
