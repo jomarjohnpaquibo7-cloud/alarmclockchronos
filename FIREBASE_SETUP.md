@@ -1,24 +1,10 @@
 # Firebase setup for Chronos
+Native Android alarm notifications work without Firebase. Cloud sync is enabled only when all Firebase web app configuration values are provided at build time.
 
-The native Android alarm notifications work without Firebase. Cloud sync is enabled only when all Firebase web app configuration values are provided at build time.
+1. Create a Firebase project at https://console.firebase.google.com/ and add a Web app.
+2. In Firebase Authentication → Sign-in method, enable Anonymous.
+3. Create a Firestore database and publish the rules in `firestore.rules`.
+4. In GitHub repository Settings → Secrets and variables → Actions → Variables, add these variables from the Firebase web app config: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`.
+5. Run the Build Chronos Android APK workflow. If these variables are absent, the app uses local storage instead of cloud sync.
 
-## 1. Create/configure Firebase
-1. Create a Firebase project at https://console.firebase.google.com/.
-2. Add a Web app and copy its Firebase configuration.
-3. In **Authentication → Sign-in method**, enable **Anonymous**.
-4. In **Firestore Database**, create a database.
-5. Publish the rules in `firestore.rules`.
-
-## 2. Add GitHub Actions repository variables
-Open the repository **Settings → Secrets and variables → Actions → Variables** and add these repository variables from the Firebase web app configuration:
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-
-These are Firebase web-app client configuration values, not Admin SDK credentials. Never put a Firebase service-account private key in the app.
-
-## 3. Build APK
-Run the **Build Chronos Android APK** workflow from GitHub Actions. When all variables are set, the build embeds the Firebase configuration. If they are absent, the app keeps its data locally instead of cloud syncing.
+These are client web configuration values. Never put a Firebase Admin SDK service-account private key in the app.
