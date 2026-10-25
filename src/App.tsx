@@ -281,7 +281,7 @@ function App() {
             <div className="section-label">
               <Clock3 size={15} /> LIVE TIME{' '}
               <span className="timezone">
-                {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                {'ASIA/PHILIPPINES'}
               </span>
             </div>
             <div className="clock-content">
