@@ -262,15 +262,15 @@ function App() {
     <div className={`app-shell ${theme}-theme`}>
       <header className="topbar">
         <div className="brand">
-          <div className="brand-icon">
-            <Clock3 size={25} />
+          <div className="brand-icon brand-logo-wrap">
+            <img src="/resources/gising-na-logo.jpg" alt="Gising Na! Alarm Solutions" className="brand-logo" />
           </div>
           <div>
             <div className="brand-title">
-              CHRONOS <span>PRO</span>
+              GISING NA! <span>ALARM</span>
             </div>
             <div className="brand-subtitle">
-              Precision Alarm & Schedule Command Center
+              Alarm & Schedule Manager · Offline-ready
             </div>
           </div>
         </div>
