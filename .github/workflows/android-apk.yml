@@ -1,5 +1,4 @@
 name: Build Chronos Android APK
-
 on:
   workflow_dispatch:
   push:
@@ -9,47 +8,46 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'capacitor.config.ts'
+      - 'src/**'
+      - 'firestore.rules'
       - '.github/workflows/android-apk.yml'
-
 permissions:
   contents: read
-
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install dependencies
         run: npm install
-
       - name: Build web assets
         run: npm run build
-
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
       - name: Generate Android project
         run: npx cap add android
-
-      - name: Sync Capacitor
+      - name: Sync Capacitor plugins
         run: npx cap sync android
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
-
       - name: Build debug APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
-
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
