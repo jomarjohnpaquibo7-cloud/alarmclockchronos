@@ -10,6 +10,7 @@ import {
   Edit3,
   FileText,
   Moon,
+  Sun,
   Plus,
   Search,
   Trash2,
@@ -64,6 +65,15 @@ function App() {
   const [noteBody, setNoteBody] = useState('');
   const [ringing, setRinging] = useState<Schedule | null>(null);
   const [snoozeAt, setSnoozeAt] = useState<number | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try { return localStorage.getItem('chronos_theme') === 'light' ? 'light' : 'dark'; }
+    catch { return 'dark'; }
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('chronos_theme', theme); } catch { /* session-only theme */ }
+  }, [theme]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(new Date()), 1000);
@@ -224,7 +234,7 @@ function App() {
   }
   const hour = clock.getHours() % 12 || 12;
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${theme}-theme`}>
       <header className="topbar">
         <div className="brand">
           <div className="brand-icon">
@@ -239,13 +249,22 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="header-stats">
-          <span className="stat">
-            <i /> {activeCount} Active Alarm{activeCount !== 1 ? 's' : ''}
-          </span>
-          <span className="stat">
-            <FileText size={14} /> {state.notes.length} Saved Notes
-          </span>
+        <div className="header-actions">
+          <button className="theme-toggle" type="button"
+            onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          </button>
+          <div className="header-stats">
+            <span className="stat">
+              <i /> {activeCount} Active Alarm{activeCount !== 1 ? 's' : ''}
+            </span>
+            <span className="stat">
+              <FileText size={14} /> {state.notes.length} Saved Notes
+            </span>
+          </div>
         </div>
       </header>
       <main className="layout">
