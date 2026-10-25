@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Create a schedule and retain it after reload",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": ["schedule creation", "database persistence", "schedule list"],
+    "description": "Checks a schedule can be saved and remains visible after reloading.",
+    "steps": [
+      "Enter a schedule name and time",
+      "Select Monday and save the schedule",
+      "Refresh the page"
+    ],
+    "expected": "The new schedule is still visible after refresh."
+  },
+  {
+    "name": "Edit, disable, and delete a schedule",
+    "viewport": "desktop",
+    "covers": [
+      "schedule editing",
+      "enable and disable schedule",
+      "schedule deletion",
+      "database update and delete"
+    ],
+    "description": "Checks schedule actions update persisted state and destructive actions are confirmed.",
+    "steps": [
+      "Create a schedule",
+      "Edit its title and save",
+      "Turn its active switch off",
+      "Delete the schedule and confirm"
+    ],
+    "expected": "The edited title is shown, the switch changes state, and the deleted schedule disappears."
+  },
+  {
+    "name": "Create and delete a quick note",
+    "viewport": "desktop",
+    "covers": ["note creation", "note deletion", "database persistence"],
+    "description": "Checks notes can be added, rendered, and removed from saved state.",
+    "steps": [
+      "Open Quick Notepad",
+      "Enter a title and details and add the note",
+      "Delete the note and confirm"
+    ],
+    "expected": "The note appears after saving and disappears after confirmed deletion."
+  },
+  {
+    "name": "Reject schedule without repeat days",
+    "viewport": "mobile",
+    "covers": [
+      "repeat-day validation",
+      "mobile schedule form",
+      "validation error"
+    ],
+    "description": "Checks the form prevents saving a schedule without selecting at least one day.",
+    "steps": [
+      "Open the schedule form on mobile",
+      "Enter a title and time but select no days",
+      "Submit the form"
+    ],
+    "expected": "A visible validation message asks for at least one repeat day and no schedule is added."
+  },
+  {
+    "name": "Search schedules and keep alarm controls available",
+    "viewport": "mobile",
+    "covers": [
+      "schedule search",
+      "alarm snooze and dismiss",
+      "responsive layout"
+    ],
+    "description": "Checks search filters the schedule list and alarm overlay offers snooze and dismiss controls.",
+    "steps": [
+      "Create two schedules with different titles",
+      "Search for one title",
+      "Trigger an alarm by setting a matching enabled time and day"
+    ],
+    "expected": "Only matching schedules appear in search results and the alarm overlay provides snooze and dismiss."
+  }
+]
