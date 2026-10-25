@@ -12,10 +12,26 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID as string | undefined,
   appId: import.meta.env.VITE_FIREBASE_APP_ID as string | undefined,
 };
-const configured = Object.values(firebaseConfig).every(v => typeof v === 'string' && v.length > 0);
-const app = configured ? (getApps()[0] ?? initializeApp(firebaseConfig)) : null;
-const auth = app ? getAuth(app) : null;
-const db = app ? getFirestore(app) : null;
+// Only initialize Firebase when the public web API key looks like a real Google API key.
+// A missing/placeholder key must never prevent the offline app from starting.
+const apiKey = firebaseConfig.apiKey?.trim() ?? '';
+const validApiKeyShape = /^AIza[0-9A-Za-z_-]{30,}$/.test(apiKey) && !/YOUR_|PLACEHOLDER|CHANGE_ME|undefined|null/i.test(apiKey);
+const configured = validApiKeyShape && Object.values(firebaseConfig).every(v => typeof v === 'string' && v.trim().length > 0);
+let app: ReturnType<typeof initializeApp> | null = null;
+let auth: ReturnType<typeof getAuth> | null = null;
+let db: ReturnType<typeof getFirestore> | null = null;
+if (configured) {
+  try {
+    app = getApps()[0] ?? initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } catch {
+    // Invalid Firebase configuration falls back to device storage instead of blocking startup.
+    app = null;
+    auth = null;
+    db = null;
+  }
+}
 let authPromise: Promise<User> | null = null;
 let onlineSyncRegistered = false;
 let activeClientKey: string | null = null;
