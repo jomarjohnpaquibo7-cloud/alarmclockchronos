@@ -140,6 +140,13 @@ button {
   padding: 23px;
   border-top: 1px solid #0e8192;
 }
+.clock-brand {
+  font: 800 23px Orbitron, sans-serif;
+  letter-spacing: 2px;
+  color: #eef4ff;
+  margin-bottom: 18px;
+}
+.light-theme .clock-brand { color: #26384d; }
 .section-label,
 .panel-heading,
 .field-heading {
@@ -847,6 +854,7 @@ footer span {
   .brand-title {
     font-size: 19px;
   }
+  .clock-brand { font-size: 19px; }
   .brand-subtitle {
     font-size: 9px;
   }
