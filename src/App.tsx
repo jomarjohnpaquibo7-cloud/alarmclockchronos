@@ -54,6 +54,7 @@ function App() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [errorMsg, setErrorMsg] = useState('');
   const [title, setTitle] = useState('');
   const [time, setTime] = useState('07:00');
@@ -77,6 +78,9 @@ function App() {
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(new Date()), 1000);
+    const updateOnline = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', updateOnline);
+    window.addEventListener('offline', updateOnline);
     prepareAlarmNotifications().catch(() => setErrorMsg('Please allow notifications so alarms can ring on this device.'));
     loadState(clientKey)
       .then(async data => {
@@ -86,7 +90,11 @@ function App() {
       })
       .catch(() => setErrorMsg('Could not load saved data. Check Firebase setup and internet access.'))
       .finally(() => setLoading(false));
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('online', updateOnline);
+      window.removeEventListener('offline', updateOnline);
+    };
   }, []);
 
   useEffect(() => {
@@ -609,7 +617,7 @@ function App() {
         <span>
           <Moon size={13} /> Built for focus. Designed for time.
         </span>
-        <span>Cloud database {saving ? '· Syncing' : '· Connected'}</span>
+        <span>{saving ? 'Saving…' : isOnline ? 'Online · cloud sync ready' : 'Offline · saved on device'}</span>
       </footer>
       {ringing && (
         <div className="modal-backdrop">
