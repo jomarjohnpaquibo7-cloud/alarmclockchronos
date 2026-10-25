@@ -49,7 +49,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes imagemagick
           mkdir -p assets
-          convert public/resources/gising-na-logo.jpg -auto-orient -resize '1024x1024^' -gravity center -extent 1024x1024 assets/icon.png
+          # Fit the full logo inside a square frame so Android's adaptive icon does not crop it.
+          convert -size 1024x1024 xc:'#070a12' \
+            \( -size 900x900 xc:none -fill '#08202b' -stroke '#00f2fe' -strokewidth 12 \
+               -draw 'roundrectangle 6,6 894,894 90,90' \) -gravity center -composite \
+            \( public/resources/gising-na-logo.jpg -auto-orient -thumbnail '700x700' \) \
+            -gravity center -compose over -composite assets/icon.png
           cp assets/icon.png assets/icon-foreground.png
           convert -size 1024x1024 xc:'#070a12' assets/icon-background.png
           npx --yes @capacitor/assets generate --android --assetPath assets
