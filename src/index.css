@@ -12,10 +12,25 @@
 * {
   box-sizing: border-box;
 }
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+html {
+  min-height: 100%;
+  background: #070a12;
+  overscroll-behavior-y: none;
+}
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
   background:
     radial-gradient(
       circle at 12% 15%,
@@ -35,9 +50,12 @@ button {
   cursor: pointer;
 }
 .app-shell {
-  max-width: 1500px;
-  margin: auto;
-  padding: 0 28px 22px;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0 28px max(22px, env(safe-area-inset-bottom));
 }
 .topbar {
   position: sticky;
@@ -857,6 +875,16 @@ footer span {
     box-shadow: 0 0 50px #ff28591a;
     border-color: #ff7894;
   }
+}
+
+/* Full-screen, edge-to-edge app layout for phones and installed APKs. */
+@media (max-width: 640px) {
+  .app-shell {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .topbar { padding-top: max(12px, env(safe-area-inset-top)); }
 }
 @media (max-width: 960px) {
   .layout {
