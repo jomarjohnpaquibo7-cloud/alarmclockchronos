@@ -52,17 +52,19 @@ jobs:
             sed -i '/<manifest/a\    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />' "$manifest"
           fi
           grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"
-      - name: Prepare launcher icon from Gising Na logo
+      - name: Prepare circular launcher icon from Gising Na logo
         run: |
           sudo apt-get update
           sudo apt-get install --yes imagemagick
           mkdir -p assets
-          # Fit the full logo inside a square frame so Android's adaptive icon does not crop it.
-          convert -size 1024x1024 xc:'#070a12' \
-            \( -size 900x900 xc:none -fill '#08202b' -stroke '#00f2fe' -strokewidth 12 \
-               -draw 'roundrectangle 6,6 894,894 90,90' \) -gravity center -composite \
-            \( public/resources/gising-na-logo.jpg -auto-orient -thumbnail '700x700' \) \
-            -gravity center -compose over -composite assets/icon.png
+          # Crop the logo to a circle and keep the rest of the icon transparent.
+          convert public/resources/gising-na-logo.jpg -auto-orient -thumbnail '700x700^' -gravity center -extent 700x700 /tmp/gising-na-square.png
+          convert -size 700x700 xc:black -fill white -draw 'circle 350,350 350,2' /tmp/gising-na-circle-mask.png
+          convert /tmp/gising-na-square.png /tmp/gising-na-circle-mask.png -alpha off -compose CopyOpacity -composite /tmp/gising-na-circle.png
+          # Draw a circular teal badge with a cyan outline, then place the circular logo inside it.
+          convert -size 1024x1024 xc:none -fill '#08202b' -stroke '#00f2fe' -strokewidth 12 \
+            -draw 'circle 512,512 512,54' /tmp/gising-na-base.png
+          convert /tmp/gising-na-base.png /tmp/gising-na-circle.png -gravity center -compose over -composite assets/icon.png
           cp assets/icon.png assets/icon-foreground.png
           convert -size 1024x1024 xc:'#070a12' assets/icon-background.png
           npx --yes @capacitor/assets generate --android --assetPath assets
