@@ -19,7 +19,7 @@ export async function prepareAlarmNotifications() {
     throw new Error('Exact alarm access is off. Tap “Enable exact alarms” and allow Alarms & reminders in Android settings.');
   }
 
-  await LocalNotifications.createChannel({ id: 'chronos-alarms', name: 'Chronos Alarms', description: 'Scheduled alarm reminders', importance: 5, visibility: 1, sound: 'default', vibration: true });
+  await LocalNotifications.createChannel({ id: 'chronos-alarms-v2', name: 'Gising Na! Alarms', description: 'Alarm notifications with sound and vibration', importance: 5, visibility: 1, sound: 'default', vibration: true });
 }
 
 export async function openExactAlarmSettings() {
@@ -39,7 +39,7 @@ export async function syncAlarmNotifications(alarms: Alarm[]) {
     for (const day of alarm.days) {
       const weekday = DAY_NUMBER[day]; if (!weekday) continue;
       const id = notificationId(alarm.id, day);
-      wanted.set(id, { id, title: alarm.title || 'Chronos Alarm', body: alarm.notes || 'Your scheduled alarm is due.', channelId: 'chronos-alarms', schedule: { on: { weekday, hour, minute }, repeats: true, allowWhileIdle: true }, sound: 'default', extra: { scheduleId: alarm.id, day } });
+      wanted.set(id, { id, title: alarm.title || 'Chronos Alarm', body: alarm.notes || 'Your scheduled alarm is due.', channelId: 'chronos-alarms-v2', schedule: { on: { weekday, hour, minute }, repeats: true, allowWhileIdle: true }, sound: 'default', extra: { scheduleId: alarm.id, day } });
     }
   }
   const stale = pending.notifications.filter(n => !wanted.has(n.id));
