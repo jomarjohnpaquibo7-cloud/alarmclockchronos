@@ -51,7 +51,12 @@ jobs:
           if ! grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"; then
             sed -i '/<manifest/a\    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />' "$manifest"
           fi
+          # This app's primary purpose is alarm scheduling, so declare the Android 14+ alarm permission too.
+          if ! grep -q 'android.permission.USE_EXACT_ALARM' "$manifest"; then
+            sed -i '/<manifest/a\    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />' "$manifest"
+          fi
           grep -q 'android.permission.SCHEDULE_EXACT_ALARM' "$manifest"
+          grep -q 'android.permission.USE_EXACT_ALARM' "$manifest"
       - name: Prepare circular launcher icon from Gising Na logo
         run: |
           sudo apt-get update
